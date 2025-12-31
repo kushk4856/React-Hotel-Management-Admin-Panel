@@ -24,7 +24,7 @@ const Sidebar = ({ menu }) => {
     <StyledSidebar>
       <Logo />
       <MainNav />
-      {/* <Uploader /> */}
+      <Uploader />
     </StyledSidebar>
   );
 };

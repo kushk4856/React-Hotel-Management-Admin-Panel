@@ -196,9 +196,7 @@ h6 {
   hyphens: auto;
 }
 
-/* .foo{
-  color: aqua;
-} */
+
 
 img {
   max-width: 100%;
