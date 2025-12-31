@@ -78,4 +78,4 @@ describe("CreateCabinForm", () => {
     expect(alerts.length).toBeGreaterThan(0);
     expect(mockCreateCabin).not.toHaveBeenCalled();
   });
-});
+})
