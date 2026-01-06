@@ -36,7 +36,7 @@ const ProtectedRoute = ({ children }) => {
   //4.  If there is a user, render the app
   if (isAuthenticated) return children;
   
-  //5. Fallback for unauthenticated state (prevents undefined return)
+  //5. Fallback for unauthenticated state
   return null;
 };
 

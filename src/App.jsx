@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "./ui/ProtectedRoute";
+import RestrictedTo from "./ui/RestrictedTo";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import Spinner from "./ui/Spinner";
 
@@ -54,7 +55,14 @@ const App = () => {
                   element={<BookingDetailPage />}
                 />
                 <Route path="checkin/:bookingId" element={<Checkin />} />
-                <Route path="users" element={<Users />} />
+                <Route
+                  path="users"
+                  element={
+                    <RestrictedTo allowedRole="admin">
+                      <Users />
+                    </RestrictedTo>
+                  }
+                />
                 <Route path="cabins" element={<Cabins />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="account" element={<Account />} />

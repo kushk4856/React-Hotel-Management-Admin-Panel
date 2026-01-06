@@ -2,6 +2,7 @@
 /* eslint-disable react/prop-types */
 import styled from "styled-components";
 import { useDeleteCabin } from "./useDeleteCabin";
+import { useUser } from "../authentication/useUser";
 import { formatCurrency } from "../../utils/helpers";
 import CreateCabinForm from "./CreateCabinForm";
 import { HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2";
@@ -53,6 +54,7 @@ const Discount = styled.div`
 const CabinRow = ({ cabin }) => {
   const { isDeleting, deleteCabin } = useDeleteCabin();
   const { isCreating, createCabin } = useCreateCabin();
+  const { role } = useUser();
 
   const {
     id: cabinId,
@@ -100,15 +102,19 @@ const CabinRow = ({ cabin }) => {
                   Duplicate
                 </Menus.Button>
 
-                {/* btns that open modal */}
+                {/* EDIT: Admin + Manager */}
+                {["admin", "manager"].includes(role) && (
+                  <Modal.Open opens={"edit"}>
+                    <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
+                  </Modal.Open>
+                )}
 
-                <Modal.Open opens={"edit"}>
-                  <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
-                </Modal.Open>
-
-                <Modal.Open opens={"delete"}>
-                  <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
-                </Modal.Open>
+                {/* DELETE: Admin Only */}
+                {role === "admin" && (
+                  <Modal.Open opens={"delete"}>
+                    <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
+                  </Modal.Open>
+                )}
               </Menus.List>
             </Menus.Menu>
 

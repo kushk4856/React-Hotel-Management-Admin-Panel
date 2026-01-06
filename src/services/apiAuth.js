@@ -1,6 +1,15 @@
 import supabase, { supabaseUrl } from "./supabase";
 
-export async function singup({ fullName, email, password }) {
+export async function getRoles() {
+  const { data, error } = await supabase.from("roles").select("*");
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function singup({ fullName, email, password, roleId }) {
+  // 1. Create the user
+  // The 'public.handle_new_user' DB TRIGGER will catch this implementation
+  // and automatically assign the role_id from the metadata to 'user_roles'
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -8,6 +17,7 @@ export async function singup({ fullName, email, password }) {
       data: {
         fullName,
         avatar: "",
+        role_id: roleId, // Trigger listens for this!
       },
     },
   });
@@ -35,9 +45,24 @@ export async function getCurrentUser() {
 
   const { data, error } = await supabase.auth.getUser();
 
-  // console.log(data);
-
   if (error) throw new Error(error.message);
+  
+  try {
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("roles(name)")
+      .eq("user_id", data.user.id)
+      .maybeSingle();
+
+    if (roleData?.roles?.name) {
+      data.user.role = roleData.roles.name; 
+    } else {
+       data.user.role = data.user.user_metadata?.role;
+    }
+  } catch (err) {
+    console.error("RBAC Fetch Error:", err);
+    data.user.role = data.user.user_metadata?.role;
+  }
 
   return data?.user;
 }
