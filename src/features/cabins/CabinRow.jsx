@@ -11,6 +11,7 @@ import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
+import Tag from "../../ui/Tag";
 
 // const TableRow = styled.div`
 //   display: grid;
@@ -64,6 +65,7 @@ const CabinRow = ({ cabin }) => {
     discount,
     image,
     description,
+    is_out_of_service,
   } = cabin;
 
   function handleDuplicate() {
@@ -81,7 +83,14 @@ const CabinRow = ({ cabin }) => {
     <>
       <Table.Row>
         <Img src={image} />
-        <Cabin>{name}</Cabin>
+        <Cabin>
+            {name}
+            {is_out_of_service && (
+                <div style={{marginTop: '0.4rem'}}>
+                    <Tag type="red" style={{fontSize: '0.9rem', width: 'fit-content'}}>Maintenance</Tag> 
+                </div>
+            )}
+        </Cabin>
         <div>Fits up to {maxCapacity}</div>
         <Price>{formatCurrency(regularPrice)}</Price>
         {discount ? (

@@ -29,7 +29,7 @@ const UserAvatar = () => {
     <StyledUserAvatar>
       <Avatar
         src={avatar || "default-user.jpg"}
-        alth={`Avatar of ${fullName}`}
+        alt={`Avatar of ${fullName}`}
       />
       <span>{fullName}</span>
     </StyledUserAvatar>

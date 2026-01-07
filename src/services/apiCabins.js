@@ -14,12 +14,9 @@ export async function getCabins() {
 export async function createEditCabin(newCabin, id) {
   console.log(newCabin);
   const hasImagePath = newCabin.image?.startsWith?.(supabaseUrl);
-  const imageName = `${Math.random()}-${newCabin.image.name}`.replaceAll(
-    "/",
-    ""
-  );
-
-  // https://xjlsdepduwvvrjlopzux.supabase.co/storage/v1/object/public/cabin-images/cabin-001.jpg
+  // If it's a string URL (existing image), don't try to access .name
+  // If it's a File object (new image), use .name
+  const imageName = hasImagePath ? 'existing' : `${Math.random()}-${newCabin.image.name}`.replaceAll("/", "");
 
   const imagePath = hasImagePath
     ? newCabin.image
@@ -69,4 +66,19 @@ export async function deleteCabin(id) {
     console.error(error);
     throw new Error("Cabins could not be deleted");
   }
+}
+
+export async function updateCabinStatus(id, isOutOfService) {
+  const { data, error } = await supabase
+    .from("cabins")
+    .update({ is_out_of_service: isOutOfService })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    throw new Error("Cabin status could not be updated");
+  }
+  return data;
 }

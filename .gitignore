@@ -11,21 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-docs_local/
-
-
-
-
-
-
-
-
-
-
-
-
-# Documentation (Private)
-
 
 # Editor directories and files
 .vscode/*
@@ -40,4 +25,4 @@ docs_local/
 .env
 .cursorrules
 
-
+docs_local/

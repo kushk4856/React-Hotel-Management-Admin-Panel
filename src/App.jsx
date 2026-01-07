@@ -9,6 +9,7 @@ import ProtectedRoute from "./ui/ProtectedRoute";
 import RestrictedTo from "./ui/RestrictedTo";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import Spinner from "./ui/Spinner";
+import RoleBasedRedirect from "./ui/RoleBasedRedirect";
 
 // Lazy Loading Pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -17,6 +18,13 @@ const Cabins = lazy(() => import("./pages/Cabins"));
 const Users = lazy(() => import("./pages/Users"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Account = lazy(() => import("./pages/Account"));
+const MyRooms = lazy(() => import("./pages/MyRooms"));
+const HousekeepingDashboard = lazy(() => import("./pages/HousekeepingDashboard"));
+const HousekeepingModule = lazy(() => import("./pages/HousekeepingModule"));
+const RoomDetails = lazy(() => import("./pages/RoomDetails"));
+const Maintenance = lazy(() => import("./pages/Maintenance"));
+const LostFound = lazy(() => import("./pages/LostFound"));
+const ShiftNotes = lazy(() => import("./pages/ShiftNotes"));
 const Login = lazy(() => import("./pages/Login"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
 const BookingDetailPage = lazy(() => import("./pages/BookingDetailPage"));
@@ -47,14 +55,41 @@ const App = () => {
                   </ProtectedRoute>
                 }
               >
-                <Route index element={<Navigate replace to="dashboard" />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="bookings" element={<Booking />} />
+                <Route index element={<RoleBasedRedirect />} />
+                
+                <Route 
+                  path="dashboard" 
+                  element={
+                    <RestrictedTo allowedRole={["admin", "manager"]}>
+                      <Dashboard />
+                    </RestrictedTo>
+                  } 
+                />
+                <Route 
+                  path="bookings" 
+                  element={
+                    <RestrictedTo allowedRole={["admin", "manager", "receptionist"]}>
+                      <Booking />
+                    </RestrictedTo>
+                  } 
+                />
                 <Route
                   path="bookings/:bookingId"
-                  element={<BookingDetailPage />}
+                  element={
+                    <RestrictedTo allowedRole={["admin", "manager", "receptionist"]}>
+                      <BookingDetailPage />
+                    </RestrictedTo>
+                  }
                 />
-                <Route path="checkin/:bookingId" element={<Checkin />} />
+                <Route 
+                   path="checkin/:bookingId" 
+                   element={
+                    <RestrictedTo allowedRole={["admin", "manager", "receptionist"]}>
+                       <Checkin />
+                    </RestrictedTo>
+                   } 
+                />
+                
                 <Route
                   path="users"
                   element={
@@ -63,8 +98,33 @@ const App = () => {
                     </RestrictedTo>
                   }
                 />
-                <Route path="cabins" element={<Cabins />} />
-                <Route path="settings" element={<Settings />} />
+                <Route 
+                  path="cabins" 
+                  element={
+                    <RestrictedTo allowedRole={["admin", "manager"]}>
+                      <Cabins />
+                    </RestrictedTo>
+                  } 
+                />
+                <Route 
+                  path="settings" 
+                  element={
+                    <RestrictedTo allowedRole="admin">
+                      <Settings />
+                    </RestrictedTo>
+                  } 
+                />
+                
+                {/* Housekeeping Routes - Accessible to all (or specific roles) */}
+                {/* Manager/Admin can view. Housekeeping works here. */}
+                <Route path="housekeeping" element={<HousekeepingModule />} />
+                <Route path="housekeeping/room/:taskId" element={<RoomDetails />} />
+                <Route path="my-rooms" element={<MyRooms />} />
+                <Route path="maintenance" element={<Maintenance />} />
+                <Route path="lost-found" element={<LostFound />} />
+                <Route path="shift-notes" element={<ShiftNotes />} />
+
+                {/* Account is generic */}
                 <Route path="account" element={<Account />} />
               </Route>
               <Route path="login" element={<Login />} />
