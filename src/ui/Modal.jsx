@@ -112,6 +112,6 @@ function Window({ children, name }) {
 Modal.Open = Open;
 Modal.Window = Window;
 
-Modal.defaultProps = { type: "normal" };
+
 
 export default Modal;

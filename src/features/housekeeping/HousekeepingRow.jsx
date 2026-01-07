@@ -5,7 +5,7 @@ import styled from "styled-components";
 import Tag from "../../ui/Tag";
 import Table from "../../ui/Table";
 import { useUpdateTask } from "./useUpdateTask";
-import { HiChevronDown } from "react-icons/hi2";
+import { HiChevronDown, HiLockClosed, HiArrowPath } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 import { useStaff } from "./useStaff";
 import { useAssignTask } from "./useAssignTask";
@@ -33,10 +33,10 @@ const Stacked = styled.div`
   }
 `;
 
-// --- Custom Status Dropdown Styles ---
-
 const StatusWrapper = styled.div`
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 `;
 
 const StatusButton = styled.button`
@@ -50,14 +50,14 @@ const StatusButton = styled.button`
 `;
 
 const DropdownList = styled.ul`
-  position: fixed; /* Fixed to viewport */
+  position: fixed; 
   background-color: var(--color-grey-0);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-md);
   padding: 0.4rem 0;
   min-width: 14rem;
   border: 1px solid var(--color-grey-100);
-  z-index: 1000; /* High Z-index */
+  z-index: 1000; 
 `;
 
 const DropdownItem = styled.li`
@@ -75,19 +75,38 @@ const DropdownItem = styled.li`
   }
 `;
 
-function StatusSelector({ currentStatus, onSelect, disabled }) {
+const SmallButton = styled.button`
+    background: none;
+    border: 1px solid var(--color-brand-600);
+    color: var(--color-brand-600);
+    border-radius: var(--border-radius-sm);
+    padding: 0.4rem 0.8rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &:hover {
+        background-color: var(--color-brand-50);
+    }
+`;
+
+// Helper for status colors
+const statusToTagName = {
+    todo: "silver",
+    in_progress: "blue",
+    done: "brand",
+    verified: "green",
+};
+
+function StatusSelector({ currentStatus, onSelect, disabled, allowedOptions }) {
   const [isOpen, setIsOpen] = useState(false);
   const [coords, setCoords] = useState({});
   const buttonRef = useRef(null);
   
-  const statusToTagName = {
-    pending: "yellow",
-    cleaning: "blue",
-    completed: "green",
-  };
-
-  const statusLabel = currentStatus.replace("-", " ");
-  const type = statusToTagName[currentStatus];
+  const statusLabel = currentStatus.replace("_", " ").toUpperCase();
+  const type = statusToTagName[currentStatus] || "grey";
 
   function toggleOpen(e) {
     if (disabled) return;
@@ -105,24 +124,28 @@ function StatusSelector({ currentStatus, onSelect, disabled }) {
     setIsOpen(false);
   }
 
+  // Filter options based on RBAC rules passed in
+  const options = ["todo", "in_progress", "done", "verified"].filter(s => 
+      allowedOptions ? allowedOptions.includes(s) : true
+  );
+
   return (
     <StatusWrapper>
-      <StatusButton ref={buttonRef} onClick={toggleOpen} disabled={disabled}>
+      <StatusButton ref={buttonRef} onClick={toggleOpen} disabled={disabled || options.length === 0}>
         <Tag type={type}>
           {statusLabel}
-          <HiChevronDown style={{ width: "1.2rem", height: "1.2rem", marginLeft: "0.2rem" }} />
+          {!disabled && options.length > 0 && <HiChevronDown style={{ width: "1.2rem", height: "1.2rem", marginLeft: "0.2rem" }} />}
         </Tag>
       </StatusButton>
 
-      {isOpen && createPortal(
+      {isOpen && !disabled && createPortal(
         <>
-            {/* Transparent backdrop to handle outside clicks */}
             <div 
                 style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999 }} 
                 onClick={(e) => { e.stopPropagation(); setIsOpen(false); }} 
             />
             <DropdownList style={{ top: coords.top, left: coords.left }}>
-            {["pending", "cleaning", "completed"].map((status) => (
+            {options.map((status) => (
                 <DropdownItem key={status} onClick={() => handleSelect(status)}>
                 <div
                     style={{
@@ -132,7 +155,7 @@ function StatusSelector({ currentStatus, onSelect, disabled }) {
                     backgroundColor: `var(--color-${statusToTagName[status]}-700)`,
                     }}
                 />
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {status.replace("_", " ").toUpperCase()}
                 </DropdownItem>
             ))}
             </DropdownList>
@@ -145,7 +168,7 @@ function StatusSelector({ currentStatus, onSelect, disabled }) {
 
 
 function HousekeepingRow({ task }) {
-  const { id, status, task_date, cabins, notes, assigned_to } = task;
+  const { id, status, created_at, cabins, notes, assigned_to, cabin_id } = task;
   const { updateTask, isUpdating } = useUpdateTask();
   const { assignTask, isAssigning } = useAssignTask();
   const { staff, isLoading: isLoadingStaff } = useStaff();
@@ -153,18 +176,39 @@ function HousekeepingRow({ task }) {
 
   const isManager = user?.role === "manager" || user?.role === "admin";
 
+  // RBAC RULES
+  let allowedOptions = [];
+  let isReadOnly = false;
+  let showReopen = false;
+
+  if (isManager) {
+      if (status === 'verified') {
+          allowedOptions = ["verified", "done", "todo"]; 
+      } else {
+          allowedOptions = ["todo", "in_progress", "done", "verified"];
+      }
+  } else {
+      // Staff Rules
+      if (status === 'todo') allowedOptions = ["todo", "in_progress"];
+      if (status === 'in_progress') allowedOptions = ["todo", "in_progress", "done"];
+      if (status === 'done') {
+          allowedOptions = ["in_progress", "done"]; 
+      }
+      if (status === 'verified') {
+          isReadOnly = true;
+          allowedOptions = []; 
+          showReopen = true; 
+      }
+  }
+
   function handleStatusChange(newStatus) {
-    const updateData = { id, status: newStatus };
+    updateTask({ id, status: newStatus, cabinId: cabin_id });
+  }
 
-    // Logic for Time Logging
-    if (newStatus === "cleaning") {
-      updateData.started_at = new Date().toISOString();
-    }
-    if (newStatus === "completed") {
-      updateData.completed_at = new Date().toISOString();
-    }
-
-    updateTask(updateData);
+  function handleReopen() {
+      if (window.confirm("Are you sure you want to reopen this room? It will be marked Dirty.")) {
+          updateTask({ id, status: 'todo', cabinId: cabin_id });
+      }
   }
 
   function handleAssign(e) {
@@ -210,15 +254,22 @@ function HousekeepingRow({ task }) {
       </div>
 
       <Stacked>
-        <span>{new Date(task_date).toLocaleDateString()}</span>
+        <span>{new Date(created_at).toLocaleDateString()}</span>
       </Stacked>
 
-      <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <StatusSelector 
             currentStatus={status} 
             onSelect={handleStatusChange} 
-            disabled={isUpdating} 
+            disabled={isUpdating || isReadOnly} 
+            allowedOptions={allowedOptions}
         />
+        {isReadOnly && <HiLockClosed title="Verified by Manager" style={{ color: 'var(--color-green-600)' }} />}
+        {showReopen && (
+            <SmallButton onClick={handleReopen} disabled={isUpdating}>
+                <HiArrowPath /> Reopen
+            </SmallButton>
+        )}
       </div>
 
       <div>{notes || "-"}</div>

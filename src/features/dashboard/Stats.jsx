@@ -7,21 +7,21 @@ import {
 } from "react-icons/hi2";
 import Stat from "./Stat";
 import { formatCurrency } from "../../utils/helpers";
-const Stats = ({ bookings, confirmedStays, numDays, cabinCount }) => {
+const Stats = ({ bookings = [], confirmedStays = [], numDays, cabinCount }) => {
   //1.
-  const numBookings = bookings.length;
+  const numBookings = bookings?.length || 0;
 
   //2.
-  const sales = bookings.reduce((acc, cur) => acc + cur.totalPrice, 0);
+  const sales = bookings?.reduce((acc, cur) => acc + cur.totalPrice, 0) || 0;
 
   //3.
-  const checkins = confirmedStays.filter(
+  const checkins = confirmedStays?.filter(
     (booking) => booking.status === "checked-in"
-  ).length;
+  )?.length || 0;
 
   //4.
   const occupation =
-    confirmedStays.reduce((acc, cur) => acc + cur.numNights, 0) /
+    (confirmedStays?.reduce((acc, cur) => acc + cur.numNights, 0) || 0) /
     (numDays * cabinCount);
 
   return (

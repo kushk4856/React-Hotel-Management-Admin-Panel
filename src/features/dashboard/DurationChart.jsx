@@ -148,7 +148,7 @@ function prepareData(startData, stays) {
   return data;
 }
 
-const DurationChart = ({ confirmedStays }) => {
+const DurationChart = ({ confirmedStays = [] }) => {
   const { isDarkMode } = useDarkMode();
 
   const startData = isDarkMode ? startDataDark : startDataLight;

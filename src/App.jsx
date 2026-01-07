@@ -23,7 +23,6 @@ const HousekeepingDashboard = lazy(() => import("./pages/HousekeepingDashboard")
 const HousekeepingModule = lazy(() => import("./pages/HousekeepingModule"));
 const RoomDetails = lazy(() => import("./pages/RoomDetails"));
 const Maintenance = lazy(() => import("./pages/Maintenance"));
-const LostFound = lazy(() => import("./pages/LostFound"));
 const ShiftNotes = lazy(() => import("./pages/ShiftNotes"));
 const Login = lazy(() => import("./pages/Login"));
 const PageNotFound = lazy(() => import("./pages/PageNotFound"));
@@ -121,7 +120,6 @@ const App = () => {
                 <Route path="housekeeping/room/:taskId" element={<RoomDetails />} />
                 <Route path="my-rooms" element={<MyRooms />} />
                 <Route path="maintenance" element={<Maintenance />} />
-                <Route path="lost-found" element={<LostFound />} />
                 <Route path="shift-notes" element={<ShiftNotes />} />
 
                 {/* Account is generic */}

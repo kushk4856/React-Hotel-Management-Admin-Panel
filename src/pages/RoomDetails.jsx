@@ -8,6 +8,8 @@ import { useHousekeepingTasks } from "../features/housekeeping/useHousekeepingTa
 import { useUpdateTask } from "../features/housekeeping/useUpdateTask";
 import Spinner from "../ui/Spinner";
 import Tag from "../ui/Tag";
+import Modal from "../ui/Modal";
+import CreateTicketForm from "../features/maintenance/CreateTicketForm";
 
 const Card = styled.div`
   background-color: var(--color-grey-0);
@@ -51,21 +53,18 @@ function RoomDetails() {
   
   const task = tasks?.find(t => t.id === Number(taskId));
   
-  // Local state for checklist to allow instant UI feedback
+  // Local state for checklist
   const [checklistItems, setChecklistItems] = useState([]);
 
   useEffect(() => {
-    if (task?.checklist && Array.isArray(task.checklist)) {
-       setChecklistItems(task.checklist);
-    } else {
-       // Default Checklist if empty
-       setChecklistItems([
+     // Mock checklist logic until backend supports it
+     setChecklistItems([
          { label: "Change Bed Sheets", checked: false },
          { label: "Clean Bathroom", checked: false },
          { label: "Restock Minibar", checked: false },
-         { label: "Vacuum Floor", checked: false }
-       ]);
-    }
+         { label: "Vacuum Floor", checked: false },
+         { label: "Empty Trash", checked: false },
+     ]);
   }, [task]);
 
   function toggleItem(index) {
@@ -75,32 +74,52 @@ function RoomDetails() {
   }
 
   function handleSave() {
+     const allChecked = checklistItems.every(i => i.checked);
+     // Auto-advance status if all checked (simple logic)
+     const nextStatus = allChecked ? 'done' : 'in_progress';
+     
      updateTask({ 
         id: task.id, 
-        checklist: checklistItems,
-        status: checklistItems.every(i => i.checked) ? 'completed' : 'cleaning'
+        status: nextStatus,
+        cabinId: task.cabin_id // Sync cabin status
      });
      navigate(-1);
+  }
+
+  function handleReopen() {
+      if (window.confirm("Are you sure you want to reopen this room? It will be marked Dirty.")) {
+          updateTask({ id: task.id, status: 'todo', cabinId: task.cabin_id });
+          navigate(-1);
+      }
   }
 
   if (isLoading) return <Spinner />;
   if (!task) return <div>Task not found</div>;
 
+  const statusTags = {
+      todo: 'silver',
+      in_progress: 'blue',
+      done: 'brand',
+      verified: 'green'
+  };
+
   return (
     <>
       <Row type="horizontal">
         <Heading as="h1">Room {task.cabins?.name}</Heading>
-        <Tag type={task.status === 'completed' ? 'green' : 'blue'}>{task.status}</Tag>
+        <Tag type={statusTags[task.status] || 'grey'}>{task.status.replace('_', ' ').toUpperCase()}</Tag>
       </Row>
 
       <Card>
-        <DetailRow><span>Assigned To:</span><span>{task.assigned_to ? 'Me' : 'Unassigned'}</span></DetailRow>
-        <DetailRow><span>Date:</span><span>{new Date(task.task_date).toLocaleDateString()}</span></DetailRow>
+        <Heading as="h3">Task Details</Heading>
+        <DetailRow><span>Task ID:</span><span>#{task.id}</span></DetailRow>
+        <DetailRow><span>Priority:</span><span>{task.priority || 'Normal'}</span></DetailRow>
+        <DetailRow><span>Date:</span><span>{new Date(task.created_at).toLocaleDateString()}</span></DetailRow>
         <DetailRow><span>Notes:</span><span>{task.notes || "None"}</span></DetailRow>
       </Card>
 
       <Card>
-         <Heading as="h2">Cleaning Checklist</Heading>
+         <Heading as="h3">Cleaning Checklist</Heading>
          <Checklist>
             {checklistItems.map((item, index) => (
                 <CheckboxLabel key={index}>
@@ -108,7 +127,7 @@ function RoomDetails() {
                         type="checkbox" 
                         checked={item.checked} 
                         onChange={() => toggleItem(index)}
-                        disabled={isUpdating}
+                        disabled={isUpdating || task.status === 'verified'}
                     /> 
                     {item.label}
                 </CheckboxLabel>
@@ -118,10 +137,26 @@ function RoomDetails() {
 
       <Row type="horizontal">
         <Button variation="secondary" onClick={() => navigate(-1)}>Back</Button>
-        <Button variation="primary" onClick={handleSave} disabled={isUpdating}>
-            {isUpdating ? "Saving..." : "Save Progress"}
-        </Button> 
-        <Button variation="danger">Report Maintenance</Button>
+        
+        {task.status === 'verified' ? (
+            <Button variation="secondary" onClick={handleReopen} disabled={isUpdating}>
+               Reopen Task
+            </Button>
+        ) : (
+            <Button variation="primary" onClick={handleSave} disabled={isUpdating}>
+               {isUpdating ? "Saving..." : "Save & Complete"}
+            </Button>
+        )} 
+
+        <Modal>
+            <Modal.Open opens="report-issue">
+                <Button variation="danger">Report Maintenance</Button>
+            </Modal.Open>
+            <Modal.Window name="report-issue">
+                <CreateTicketForm prefillCabinId={task.cabin_id} />
+                {/* Ensure CreateTicketForm accepts prefillCabinId or user selects it */}
+            </Modal.Window>
+        </Modal>
       </Row>
     </>
   );

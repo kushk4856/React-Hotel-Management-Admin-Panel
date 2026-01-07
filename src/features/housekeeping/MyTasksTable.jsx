@@ -4,15 +4,18 @@ import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
 import Empty from "../../ui/Empty";
 import { useHousekeepingTasks } from "./useHousekeepingTasks";
-import { useHousekeepingSubscription } from "./useHousekeepingSubscription";
 import HousekeepingRow from "./HousekeepingRow";
+import { useUser } from "../authentication/useUser";
 
-function HousekeepingTable() {
-  useHousekeepingSubscription(); // Enable Realtime Sync
+function MyTasksTable() {
   const { isLoading, tasks } = useHousekeepingTasks();
+  const { user } = useUser();
 
   if (isLoading) return <Spinner />;
-  if (!tasks?.length) return <Empty resourceName="tasks" />;
+
+  const myTasks = tasks?.filter(task => task.assigned_to === user.id) || [];
+
+  if (!myTasks?.length) return <Empty resourceName="assigned tasks" />;
 
   return (
     <Menus>
@@ -26,7 +29,7 @@ function HousekeepingTable() {
         </Table.Header>
 
         <Table.Body
-          data={tasks}
+          data={myTasks}
           render={(task) => <HousekeepingRow key={task.id} task={task} />}
         />
       </Table>
@@ -34,4 +37,4 @@ function HousekeepingTable() {
   );
 }
 
-export default HousekeepingTable;
+export default MyTasksTable;

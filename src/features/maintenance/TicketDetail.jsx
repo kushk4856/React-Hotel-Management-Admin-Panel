@@ -8,18 +8,19 @@ import Heading from "../../ui/Heading";
 import Spinner from "../../ui/Spinner";
 import { useUpdateTicket } from "./useUpdateTicket";
 import { useUser } from "../authentication/useUser";
-import { HiCheckCircle } from "react-icons/hi2";
+import { HiCheckCircle, HiClock, HiUser, HiChatBubbleLeftRight } from "react-icons/hi2";
 import { updateCabinStatus } from "../../services/apiCabins"; 
 import WorkflowAction from "./WorkflowAction";
 
-// Styles
+// --- STYLES ---
 const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  width: 60rem;
-  max-height: 80vh;
+  width: 65rem;
+  max-height: 85vh;
   overflow-y: auto;
+  padding: 1rem; 
 `;
 
 const DetailRow = styled.div`
@@ -70,6 +71,58 @@ const TextArea = styled.textarea`
   min-height: 8rem;
 `;
 
+// --- TIMELINE STYLES ---
+const Timeline = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: 2rem 0;
+  border-left: 2px solid var(--color-brand-200);
+  padding-left: 2rem;
+  gap: 2rem;
+`;
+
+const TimelineItemWrapper = styled.div`
+  position: relative;
+`;
+
+const TimelineDot = styled.div`
+  position: absolute;
+  left: -2.9rem; /* Adjust based on padding of parent */
+  top: 0;
+  background-color: var(--color-brand-100);
+  color: var(--color-brand-600);
+  padding: 0.4rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-grey-0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const TimelineContent = styled.div`
+  background: var(--color-grey-50);
+  padding: 1.2rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-grey-100);
+`;
+
+const TimelineTitle = styled.h4`
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--color-grey-700);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+`;
+
+const TimelineText = styled.p`
+    font-size: 1.3rem;
+    color: var(--color-grey-600);
+    white-space: pre-wrap;
+    line-height: 1.4;
+`;
+
 const statusToColor = {
     new: 'red',
     approved: 'yellow',
@@ -78,16 +131,51 @@ const statusToColor = {
     closed: 'silver'
 };
 
+// Helper: Parse description log
+function parseJourney(description, created_at, reporter) {
+    if (!description) return [];
+
+    const steps = [{
+        title: "Ticket Created",
+        content: description.split('\n[')[0], // First block
+        icon: <HiClock />,
+        date: created_at,
+        actor: reporter
+    }];
+    
+    // Regex to find appended logs like \n[Tag]: Content
+    const regex = /\[(.*?)\]:\s(.*)/;
+    const lines = description.split('\n');
+    
+    lines.forEach(line => {
+        const match = line.match(regex);
+        if (match) {
+            let icon = <HiChatBubbleLeftRight />;
+            if (match[1].includes('Resolved') || match[1].includes('Verified')) icon = <HiCheckCircle />;
+            if (match[1].includes('User')) icon = <HiUser />;
+
+            steps.push({
+                title: match[1], 
+                content: match[2], 
+                icon: icon,
+                // treating as update without specific date for now
+            });
+        }
+    });
+    
+    return steps;
+}
+
 function TicketDetail({ ticket, onCloseModal }) {
   const { updateTicket, isUpdating } = useUpdateTicket();
   const { role, user } = useUser(); 
-  const isManager = role === 'manager';
+  const isManager = role === 'manager' || role === 'admin';
   const queryClient = useQueryClient();
   
   // Local state
-  const [priority, setPriority] = useState(ticket.priority || 'low');
-  const [assignee, setAssignee] = useState(ticket.assigned_to || ''); 
-  const [outOfService, setOutOfService] = useState(ticket.cabins?.is_out_of_service || false); 
+  const [priority, setPriority] = useState(ticket?.priority || 'low');
+  const [assignee, setAssignee] = useState(ticket?.assigned_to || ''); 
+  const [outOfService, setOutOfService] = useState(ticket?.cabins?.is_out_of_service || false); 
   const [note, setNote] = useState('');
   
   if (!ticket) return <Spinner />;
@@ -97,14 +185,13 @@ function TicketDetail({ ticket, onCloseModal }) {
       const updates = { 
           id: ticket.id, 
           status: 'approved', 
-          priority 
+          priority,
+          description: ticket.description + `\n[Updated]: High Priority assigned by Manager` 
       };
       
       if (outOfService && ticket.cabin_id) {
           updateCabinStatus(ticket.cabin_id, true)
-            .then(() => {
-                queryClient.invalidateQueries({ queryKey: ["cabins"] });
-            })
+            .then(() => queryClient.invalidateQueries({ queryKey: ["cabins"] }))
             .catch(err => console.error(err));
       }
       updateTicket(updates);
@@ -114,7 +201,8 @@ function TicketDetail({ ticket, onCloseModal }) {
       updateTicket({ 
           id: ticket.id, 
           status: 'in_progress', 
-          assigned_to: assignee || user.id 
+          assigned_to: assignee || user.id,
+          description: ticket.description + `\n[Updated]: Assigned to ${assignee || user.user_metadata?.fullName || 'Technician'}`
       });
   };
 
@@ -151,19 +239,16 @@ function TicketDetail({ ticket, onCloseModal }) {
       const restoreRoom = document.getElementById("restore")?.checked;
       if (restoreRoom && ticket.cabin_id) {
            updateCabinStatus(ticket.cabin_id, false)
-             .then(() => {
-                 queryClient.invalidateQueries({ queryKey: ["cabins"] });
-             })
+             .then(() => queryClient.invalidateQueries({ queryKey: ["cabins"] }))
              .catch(err => console.error(err));
       }
   };
 
-  // --- RENDER HELPERS ---
   const currentStatus = ticket.status;
 
   return (
     <ModalContent>
-        <Heading as="h2">Maintenance Ticket #{ticket.id}</Heading>
+        <Heading as="h2">Maintenance Journey #{ticket.id}</Heading>
 
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'2rem'}}>
             <DetailRow>
@@ -180,21 +265,32 @@ function TicketDetail({ ticket, onCloseModal }) {
                 <Label>Reported By</Label>
                 <Value>{ticket.profiles?.full_name || "Staff"}</Value>
             </DetailRow>
-             <DetailRow>
-                <Label>Date</Label>
+            <DetailRow>
+                <Label>Date Created</Label>
                 <Value>{new Date(ticket.created_at).toLocaleDateString()}</Value>
             </DetailRow>
         </div>
 
-        <div>
-            <Label>Issue Description:</Label>
-            <p style={{marginTop:'0.8rem', padding:'1rem', backgroundColor:'var(--color-grey-100)', borderRadius:'var(--border-radius-sm)', whiteSpace: 'pre-wrap'}}>
-                {ticket.description}
-            </p>
-        </div>
+        {/* TIMELINE VIEW */}
+        <Heading as="h3">Ticket Timeline</Heading>
+        <Timeline>
+            {parseJourney(ticket.description, ticket.created_at, ticket.profiles?.full_name).map((step, i) => (
+                <TimelineItemWrapper key={i}>
+                    <TimelineDot>
+                         {step.icon}
+                    </TimelineDot>
+                    <TimelineContent>
+                        <TimelineTitle>{step.title}</TimelineTitle>
+                        <TimelineText>{step.content}</TimelineText>
+                        {step.date && <span style={{fontSize:'1.1rem', color:'grey'}}>{new Date(step.date).toLocaleString()} by {step.actor}</span>}
+                    </TimelineContent>
+                </TimelineItemWrapper>
+            ))}
+        </Timeline>
         
+        {/* WORKFLOW ACTIONS (Next Steps) */}
         {currentStatus === 'new' && isManager && (
-            <WorkflowAction title="Step 1: Triage Application">
+            <WorkflowAction title="Next Step: Triage Application">
                 <InputGroup>
                     <Label>Set Priority</Label>
                     <StyledSelect value={priority} onChange={e=>setPriority(e.target.value)}>
@@ -212,7 +308,7 @@ function TicketDetail({ ticket, onCloseModal }) {
         )}
 
         {currentStatus === 'approved' && isManager && (
-             <WorkflowAction title="Step 2: Assign Technician">
+             <WorkflowAction title="Next Step: Assign Technician">
                  <InputGroup>
                      <Label>Assign To (Staff ID/Name)</Label>
                      <StyledInput placeholder="e.g. John Doe (Tech)" value={assignee} onChange={e=>setAssignee(e.target.value)} />
@@ -222,7 +318,7 @@ function TicketDetail({ ticket, onCloseModal }) {
         )}
 
         {(currentStatus === 'in_progress' || currentStatus === 'approved') && (
-            <WorkflowAction title="Step 3: Work Execution">
+            <WorkflowAction title="Next Step: Work Execution">
                 <InputGroup>
                     <Label>Resolution Note</Label>
                     <TextArea placeholder="What was fixed? Parts used?" value={note} onChange={e=>setNote(e.target.value)} />
@@ -234,7 +330,7 @@ function TicketDetail({ ticket, onCloseModal }) {
         )}
 
         {currentStatus === 'resolved' && (
-             <WorkflowAction title="Step 4: Verification Needed" variation="warning">
+             <WorkflowAction title="Next Step: Verification" variation="warning">
                 {ticket.description?.includes("[Verified]:") ? (
                     <div style={{display:'flex', alignItems:'center', gap:'1rem', color:'green', fontWeight:'bold'}}>
                         <HiCheckCircle size={24} />
@@ -257,7 +353,7 @@ function TicketDetail({ ticket, onCloseModal }) {
         )}
 
         {currentStatus === 'resolved' && isManager && (
-            <WorkflowAction title="Step 5: Final Closure">
+            <WorkflowAction title="Next Step: Final Closure">
                  <p>Housekeeping verification Pending/Passed. Ready to close?</p>
                  <div style={{display:'flex', gap:'1rem', alignItems:'center', marginBottom: '1rem'}}>
                    <input type="checkbox" id="restore" defaultChecked />

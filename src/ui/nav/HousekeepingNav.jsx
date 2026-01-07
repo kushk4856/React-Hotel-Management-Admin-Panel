@@ -29,12 +29,7 @@ function HousekeepingNav({ onCloseModal }) {
           <span>Maintenance</span>
         </StyledNavLink>
       </li>
-      <li>
-        <StyledNavLink to="/lost-found" onClick={onCloseModal}>
-          <HiOutlineArchiveBox />
-          <span>Lost & Found</span>
-        </StyledNavLink>
-      </li>
+
       <li>
         <StyledNavLink to="/shift-notes" onClick={onCloseModal}>
           <HiOutlineChatBubbleLeftRight />

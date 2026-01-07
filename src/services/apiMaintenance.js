@@ -50,6 +50,9 @@ export async function createActivityLog({ ticket_id, action, note, user_id }) {
       .from("maintenance_activity_log")
       .insert([{ ticket_id, action, note, user_id }]);
     
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error(error);
+      throw new Error("Activity log could not be created");
+    }
     return data;
 }

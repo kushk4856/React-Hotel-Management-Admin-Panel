@@ -20,8 +20,12 @@ const StyledSelect = styled.select`
   box-shadow: var(--shadow-sm);
 `;
 
-function CreateTicketForm({ onCloseModal }) {
-  const { register, handleSubmit, reset, formState } = useForm();
+function CreateTicketForm({ onCloseModal, prefillCabinId }) {
+  const { register, handleSubmit, reset, formState } = useForm({
+      defaultValues: {
+          cabin_id: prefillCabinId
+      }
+  });
   const { errors } = formState;
   const { createTicket, isCreating } = useCreateTicket();
   const { cabins, isLoading: isLoadingCabins } = useCabins();

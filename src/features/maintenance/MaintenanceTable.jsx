@@ -9,6 +9,7 @@ import TicketDetail from "./TicketDetail";
 import styled from "styled-components";
 import Menus from "../../ui/Menus";
 import { HiEye } from "react-icons/hi2";
+import Button from "../../ui/Button";
 
 const Stacked = styled.div`
   display: flex;
@@ -89,7 +90,22 @@ function MaintenanceTable() {
                     <span>{ticket.cabins?.name || "Unknown"}</span>
                 </Stacked>
 
-                <div>{ticket.description}</div>
+                <div>
+                    <span style={{ 
+                        display: 'inline-block', 
+                        maxWidth: '20ch', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        whiteSpace: 'nowrap',
+                        marginRight: '1rem',
+                        verticalAlign: 'middle'
+                    }}>
+                        {ticket.description.split('\n')[0]}
+                    </span>
+                    <Modal.Open opens="ticket-detail">
+                        <Button size="small" variation="secondary">See Details</Button>
+                    </Modal.Open>
+                </div>
 
                 <div>{ticket.profiles?.full_name || "Staff"}</div>
 

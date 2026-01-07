@@ -6,7 +6,7 @@ export function useUpdateTask() {
   const queryClient = useQueryClient();
 
   const { mutate: updateTask, isLoading: isUpdating } = useMutation({
-    mutationFn: ({ id, status }) => updateTaskStatus(id, status),
+    mutationFn: (args) => updateTaskStatus(args),
     onSuccess: () => {
       toast.success("Task status updated");
       queryClient.invalidateQueries({ queryKey: ["housekeeping"] });

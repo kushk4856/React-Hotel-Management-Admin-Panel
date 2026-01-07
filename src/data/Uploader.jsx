@@ -15,6 +15,16 @@ import { guests } from "./data-guests";
 //   breakfastPrice: 15,
 // };
 
+async function deleteMaintenanceTickets() {
+  const { error } = await supabase.from("maintenance_tickets").delete().gt("id", 0);
+  if (error) console.log(error.message);
+}
+
+async function deleteHousekeepingTasks() {
+  const { error } = await supabase.from("housekeeping_tasks").delete().gt("id", 0);
+  if (error) console.log(error.message);
+}
+
 async function deleteGuests() {
   const { error } = await supabase.from("guests").delete().gt("id", 0);
   if (error) console.log(error.message);
@@ -105,12 +115,14 @@ function Uploader() {
 
   async function uploadAll() {
     setIsLoading(true);
-    // Bookings need to be deleted FIRST
-    await deleteBookings();
+    // Delete dependent records FIRST to avoid foreign key constraints
+    await deleteMaintenanceTickets();
+    await deleteHousekeepingTasks();
+    await deleteBookings(); // Bookings also depend on cabins/guests
     await deleteGuests();
     await deleteCabins();
 
-    // Bookings need to be created LAST
+    // Create records
     await createGuests();
     await createCabins();
     await createBookings();

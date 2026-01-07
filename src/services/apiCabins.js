@@ -82,3 +82,18 @@ export async function updateCabinStatus(id, isOutOfService) {
   }
   return data;
 }
+
+export async function updateCabinState(id, updates) {
+  const { data, error } = await supabase
+    .from("cabins")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    throw new Error("Cabin state could not be updated");
+  }
+  return data;
+}

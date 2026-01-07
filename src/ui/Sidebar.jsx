@@ -19,11 +19,42 @@ const StyledSidebar = styled.aside`
   }
 `;
 
+const NavWrapper = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Custom Scrollbar */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-grey-100);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-grey-300);
+    border-radius: 10px;
+    
+    &:hover {
+      background: var(--color-brand-600);
+    }
+  }
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-grey-300) var(--color-grey-100);
+`;
+
 const Sidebar = ({ menu }) => {
   return (
     <StyledSidebar>
       <Logo />
-      <MainNav />
+      <NavWrapper>
+        <MainNav />
+      </NavWrapper>
       <Uploader />
     </StyledSidebar>
   );

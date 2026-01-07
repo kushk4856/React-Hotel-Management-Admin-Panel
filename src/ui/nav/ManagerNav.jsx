@@ -8,7 +8,8 @@ import {
   HiOutlineBanknotes, // Rates
   HiOutlineChartBar, // Reports
   HiOutlineHeart, // Service Recovery
-  HiOutlineUserCircle // Profile
+  HiOutlineUserCircle, // Profile
+  HiOutlineChatBubbleLeftRight // Shift Notes
 } from "react-icons/hi2";
 import { NavList, StyledNavLink } from "./NavStyles";
 
@@ -44,6 +45,12 @@ function ManagerNav({ onCloseModal }) {
         <StyledNavLink to="/maintenance" onClick={onCloseModal}>
           <HiOutlineWrenchScrewdriver />
           <span>Maintenance</span>
+        </StyledNavLink>
+      </li>
+      <li>
+        <StyledNavLink to="/shift-notes" onClick={onCloseModal}>
+          <HiOutlineChatBubbleLeftRight />
+          <span>Shift Notes</span>
         </StyledNavLink>
       </li>
       <li>
