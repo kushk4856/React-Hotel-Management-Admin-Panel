@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useUser } from "../features/authentication/useUser";
-import { ROLES } from "../../utils/constants";
+import { ROLES } from "../utils/constants";
 
 import ManagerNav from "./nav/ManagerNav";
 import HousekeepingNav from "./nav/HousekeepingNav";

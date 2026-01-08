@@ -126,6 +126,29 @@ const GlobalStyles = createGlobalStyle`
 
   /* Creating animations for dark mode */
   transition: background-color 0.3s, border 0.3s;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-grey-100);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-grey-300);
+    border-radius: 10px;
+    
+    &:hover {
+      background: var(--color-brand-600);
+    }
+  }
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-grey-300) var(--color-grey-100);
 }
 
 html {

@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+
 import Heading from "../ui/Heading";
 import Row from "../ui/Row";
 import Table from "../ui/Table";

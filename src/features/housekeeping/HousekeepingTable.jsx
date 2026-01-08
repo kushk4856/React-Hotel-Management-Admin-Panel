@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+
 import Spinner from "../../ui/Spinner";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";

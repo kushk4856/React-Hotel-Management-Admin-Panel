@@ -2,7 +2,6 @@
 import {
   HiOutlineCalendarDays,
   HiOutlineUserGroup,
-  HiOutlineArrowsRightLeft, // Shift/Handover
 } from "react-icons/hi2";
 import { NavList, StyledNavLink } from "./NavStyles";
 

@@ -9,7 +9,7 @@ export { default as DataItem } from "./DataItem";
 export { default as Empty } from "./Empty";
 export { default as FileInput } from "./FileInput";
 export { default as Filter } from "./Filter";
-export { default as Flag } from "./Flag";
+export { Flag } from "./Flag";
 export { default as Form } from "./Form";
 export { default as FormRow } from "./FormRow";
 export { default as FormRowVertical } from "./FormRowVertical";

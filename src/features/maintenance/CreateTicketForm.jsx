@@ -38,7 +38,7 @@ function CreateTicketForm({ onCloseModal, prefillCabinId }) {
       cabin_id: data.cabin_id,
       priority: data.priority,
       category: data.category,
-      category: data.category,
+
       status: 'new', // New flow default
       // photo_url: ... 
     }, {
