@@ -7,7 +7,6 @@ export async function getRoles() {
 }
 
 export async function singup({ fullName, email, password, roleId }) {
-  // 1. Create the user
   // The 'public.handle_new_user' DB TRIGGER will catch this implementation
   // and automatically assign the role_id from the metadata to 'user_roles'
   const { data, error } = await supabase.auth.signUp({
@@ -35,6 +34,18 @@ export async function login({ email, password }) {
 
   if (error) throw new Error(error.message);
 
+  // Audit Log
+  (async () => {
+    try {
+        await supabase.from("audit_logs").insert([{
+            action: "USER_LOGIN",
+            details: "User logged in successfully",
+            user_id: data.user.id,
+            actor_name: data.user.user_metadata?.fullName || email
+        }]).select();
+    } catch(e) { console.error("Log failed", e); }
+  })();
+
   return data;
 }
 
@@ -50,18 +61,21 @@ export async function getCurrentUser() {
   try {
     const { data: roleData } = await supabase
       .from("user_roles")
-      .select("roles(name)")
+      .select("roles(name, permissions)")
       .eq("user_id", data.user.id)
       .maybeSingle();
 
     if (roleData?.roles?.name) {
       data.user.role = roleData.roles.name; 
+      data.user.permissions = roleData.roles.permissions || [];
     } else {
        data.user.role = data.user.user_metadata?.role;
+       data.user.permissions = [];
     }
   } catch (err) {
     console.error("RBAC Fetch Error:", err);
     data.user.role = data.user.user_metadata?.role;
+    data.user.permissions = [];
   }
 
   return data?.user;

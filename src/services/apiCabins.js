@@ -12,7 +12,6 @@ export async function getCabins() {
 }
 
 export async function createEditCabin(newCabin, id) {
-  console.log(newCabin);
   const hasImagePath = newCabin.image?.startsWith?.(supabaseUrl);
   // If it's a string URL (existing image), don't try to access .name
   // If it's a File object (new image), use .name
@@ -66,6 +65,21 @@ export async function deleteCabin(id) {
     console.error(error);
     throw new Error("Cabins could not be deleted");
   }
+
+  // Audit Log
+  (async () => {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if(user) {
+            await supabase.from("audit_logs").insert([{
+                action: "DELETE_CABIN",
+                details: `Deleted cabin ID: ${id}`,
+                user_id: user.id,
+                actor_name: user.user_metadata?.fullName || user.email
+            }]).select();
+        }
+    } catch(e) { console.error(e); }
+  })();
 }
 
 export async function updateCabinStatus(id, isOutOfService) {

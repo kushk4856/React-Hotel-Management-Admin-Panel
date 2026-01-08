@@ -23,5 +23,23 @@ export async function updateSetting(newSetting) {
     console.error(error);
     throw new Error("Settings could not be updated");
   }
+  
+  // Log Action (Non-blocking)
+  (async () => {
+      try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if(user) {
+              await supabase.from("audit_logs").insert([{
+                  action: "SETTINGS_UPDATE",
+                  details: `Updated keys: ${Object.keys(newSetting).join(", ")}`,
+                  user_id: user.id,
+                  actor_name: user.user_metadata?.fullName || user.email
+              }]);
+          }
+      } catch (err) {
+          console.error("Audit Log Error", err);
+      }
+  })();
+
   return data;
 }

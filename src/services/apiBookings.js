@@ -120,5 +120,23 @@ export async function deleteBooking(id) {
     console.error(error);
     throw new Error("Booking could not be deleted");
   }
+
+  // Log Action
+  (async () => {
+      try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if(user) {
+              await supabase.from("audit_logs").insert([{
+                  action: "DELETE_BOOKING",
+                  details: `Deleted booking #${id}`,
+                  user_id: user.id,
+                  actor_name: user.user_metadata?.fullName || user.email
+              }]);
+          }
+      } catch (err) {
+          console.error("Audit Log Error", err);
+      }
+  })();
+
   return data;
 }

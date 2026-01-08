@@ -12,6 +12,12 @@ import TicketDetail from "../features/maintenance/TicketDetail";
 import ButtonGroup from "../ui/ButtonGroup";
 import { HiListBullet, HiSquares2X2 } from "react-icons/hi2";
 import MaintenanceTableOperations from "../features/maintenance/MaintenanceTableOperations";
+import styled from "styled-components";
+const OperationsContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+`;
 
 function Maintenance() {
   const [view, setView] = useState("table");
@@ -22,7 +28,7 @@ function Maintenance() {
     <Modal>
       <Row type="horizontal">
         <Heading as="h1">Maintenance Requests</Heading>
-        <div style={{display:'flex', gap:'1rem', alignItems: 'center'}}>
+        <OperationsContainer>
             <MaintenanceTableOperations />
             <ButtonGroup>
                 <Button size="small" variation={view === 'table' ? 'primary' : 'secondary'} onClick={() => setView('table')}>
@@ -32,7 +38,7 @@ function Maintenance() {
                     <HiSquares2X2 />
                 </Button>
             </ButtonGroup>
-        </div>
+        </OperationsContainer>
       </Row>
 
       <Row type="horizontal">

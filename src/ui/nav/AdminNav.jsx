@@ -4,20 +4,27 @@ import {
   HiOutlineCalendarDays,
   HiOutlineHomeModern,
   HiOutlineClipboardDocumentList,
-  HiOutlineWrenchScrewdriver, // Maintenance
-  HiOutlineChartBar, // Reports
-  HiOutlineUserCircle, // Profile
-  HiOutlineChatBubbleLeftRight, // Shift Notes
-  HiOutlineCircleStack // Audit Logs
+  HiOutlineWrenchScrewdriver,
+  HiOutlineChartBar,
+  HiOutlineChatBubbleLeftRight,
+  HiOutlineCog6Tooth,
+  HiOutlineUsers,
+  HiOutlineShieldCheck,
+  HiOutlineDocumentText, // Audit
 } from "react-icons/hi2";
-import { useUser } from "../../features/authentication/useUser";
-import { PERMISSIONS } from "../../utils/constants";
 import { NavList, StyledNavLink } from "./NavStyles";
+import styled from "styled-components";
 
-function ManagerNav({ onCloseModal }) {
-  const { permissions } = useUser();
-  const hasAuditPermission = permissions?.includes(PERMISSIONS.AUDIT_READ);
+const SectionTitle = styled.div`
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    color: var(--color-grey-500);
+    font-weight: 600;
+    margin: 1.6rem 0 0.8rem 2.4rem;
+    letter-spacing: 0.5px;
+`;
 
+function AdminNav({ onCloseModal }) {
   return (
     <NavList>
       <li>
@@ -56,30 +63,41 @@ function ManagerNav({ onCloseModal }) {
           <span>Shift Notes</span>
         </StyledNavLink>
       </li>
-
-      {hasAuditPermission && (
-          <li>
-            <StyledNavLink to="/audit-logs" onClick={onCloseModal}>
-              <HiOutlineCircleStack />
-              <span>Audit Logs</span>
-            </StyledNavLink>
-          </li>
-      )}
-
       <li>
         <StyledNavLink to="/reports" onClick={onCloseModal}>
           <HiOutlineChartBar />
           <span>Reports</span>
         </StyledNavLink>
       </li>
+
+      <SectionTitle>Administration</SectionTitle>
+
       <li>
-        <StyledNavLink to="/account" onClick={onCloseModal}>
-          <HiOutlineUserCircle />
-          <span>Profile</span>
+        <StyledNavLink to="/users" onClick={onCloseModal}>
+          <HiOutlineUsers />
+          <span>Staff & Users</span>
+        </StyledNavLink>
+      </li>
+      <li>
+        <StyledNavLink to="/roles" onClick={onCloseModal}>
+          <HiOutlineShieldCheck />
+          <span>Roles & Permissions</span>
+        </StyledNavLink>
+      </li>
+      <li>
+        <StyledNavLink to="/audit-logs" onClick={onCloseModal}>
+          <HiOutlineDocumentText />
+          <span>Audit Logs</span>
+        </StyledNavLink>
+      </li>
+      <li>
+        <StyledNavLink to="/settings" onClick={onCloseModal}>
+          <HiOutlineCog6Tooth />
+          <span>System Settings</span>
         </StyledNavLink>
       </li>
     </NavList>
   );
 }
 
-export default ManagerNav;
+export default AdminNav;

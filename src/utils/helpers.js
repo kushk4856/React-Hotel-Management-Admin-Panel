@@ -28,3 +28,36 @@ export const formatCurrency = (value) =>
   new Intl.NumberFormat("en", { style: "currency", currency: "USD" }).format(
     value
   );
+
+export const exportToCSV = (data, filename) => {
+    if (!data || !data.length) return;
+    
+    // Extract headers
+    const headers = Object.keys(data[0]);
+    
+    // Create CSV content
+    const csvContent = [
+        headers.join(","), // Header row
+        ...data.map(row => headers.map(fieldName => {
+            let value = row[fieldName];
+            // Handle commas, newlines in values
+            if (typeof value === 'string' && (value.includes(',') || value.includes('\n'))) {
+                value = `"${value.replace(/"/g, '""')}"`;
+            }
+            return value;
+        }).join(","))
+    ].join("\n");
+
+    // Create a Blob and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${filename}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};

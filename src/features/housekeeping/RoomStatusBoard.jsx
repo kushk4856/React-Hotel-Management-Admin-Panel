@@ -83,7 +83,7 @@ const RoomCard = styled.div`
   background-color: var(--color-grey-100);
   
   ${props => {
-    switch(props.status) {
+    switch(props.$status) {
       case 'dirty':
         return `
           background-color: var(--color-red-100); 
@@ -160,7 +160,7 @@ const StatusIndicator = styled.div`
   height: 12px;
   border-radius: 50%;
   ${props => {
-    switch(props.status) {
+    switch(props.$status) {
       case 'dirty': return 'background-color: var(--color-red-700);';
       case 'cleaning': return 'background-color: var(--color-yellow-700);';
       case 'clean': return 'background-color: var(--color-blue-700);';
@@ -193,8 +193,8 @@ const LegendDot = styled.div`
   height: 16px;
   border-radius: 50%;
   ${props => `
-    background-color: ${props.color};
-    border: 2px solid ${props.borderColor};
+    background-color: ${props.$color};
+    border: 2px solid ${props.$borderColor};
   `}
 `;
 
@@ -235,8 +235,8 @@ function RoomStatusBoard() {
       <RoomGridContainer>
         <RoomGrid>
           {cabins?.map(cabin => (
-            <RoomCard key={cabin.id} status={cabin.clean_status}>
-              <StatusIndicator status={cabin.clean_status} />
+            <RoomCard key={cabin.id} $status={cabin.clean_status}>
+              <StatusIndicator $status={cabin.clean_status} />
               <RoomNumber>{cabin.name}</RoomNumber>
               <RoomStatus>{cabin.clean_status}</RoomStatus>
             </RoomCard>
@@ -246,19 +246,19 @@ function RoomStatusBoard() {
       
       <Legend>
         <LegendItem>
-          <LegendDot color="var(--color-red-100)" borderColor="var(--color-red-700)" />
+          <LegendDot $color="var(--color-red-100)" $borderColor="var(--color-red-700)" />
           <span>Dirty</span>
         </LegendItem>
         <LegendItem>
-          <LegendDot color="var(--color-yellow-100)" borderColor="var(--color-yellow-700)" />
+          <LegendDot $color="var(--color-yellow-100)" $borderColor="var(--color-yellow-700)" />
           <span>Cleaning</span>
         </LegendItem>
         <LegendItem>
-          <LegendDot color="var(--color-blue-100)" borderColor="var(--color-blue-700)" />
+          <LegendDot $color="var(--color-blue-100)" $borderColor="var(--color-blue-700)" />
           <span>Clean</span>
         </LegendItem>
         <LegendItem>
-          <LegendDot color="var(--color-green-100)" borderColor="var(--color-green-700)" />
+          <LegendDot $color="var(--color-green-100)" $borderColor="var(--color-green-700)" />
           <span>Ready</span>
         </LegendItem>
       </Legend>

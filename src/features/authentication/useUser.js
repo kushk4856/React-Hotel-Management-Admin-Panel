@@ -12,6 +12,7 @@ export function useUser() {
     user,
     isAuthenticated: user?.role !== undefined, 
     // user.role is now injected by getCurrentUser (from DB or metadata)
-    role: user?.role, 
+    role: user?.role,
+    permissions: user?.permissions || [], 
   };
 }

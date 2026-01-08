@@ -2,13 +2,18 @@
 import {
   HiOutlineClipboardDocumentList,
   HiOutlineWrenchScrewdriver,
-  HiOutlineArchiveBox, // Lost & Found
   HiOutlineChatBubbleLeftRight, // Shift Notes
   HiOutlineUserCircle, // Profile
+  HiOutlineCircleStack, // Audit Logs
 } from "react-icons/hi2";
 import { NavList, StyledNavLink } from "./NavStyles";
+import { useUser } from "../../features/authentication/useUser";
+import { PERMISSIONS } from "../../utils/constants";
 
 function HousekeepingNav({ onCloseModal }) {
+  const { permissions } = useUser();
+  const hasAuditPermission = permissions?.includes(PERMISSIONS.AUDIT_READ);
+
   return (
     <NavList>
         <li>
@@ -29,6 +34,15 @@ function HousekeepingNav({ onCloseModal }) {
           <span>Maintenance</span>
         </StyledNavLink>
       </li>
+
+      {hasAuditPermission && (
+          <li>
+            <StyledNavLink to="/audit-logs" onClick={onCloseModal}>
+              <HiOutlineCircleStack />
+              <span>Audit Logs</span>
+            </StyledNavLink>
+          </li>
+      )}
 
       <li>
         <StyledNavLink to="/shift-notes" onClick={onCloseModal}>

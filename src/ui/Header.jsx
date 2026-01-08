@@ -5,9 +5,9 @@ import UserAvatar from "../features/authentication/UserAvatar";
 import MenuToggleBtn from "./MenuToggleBtn";
 
 const StyledHeader = styled.header`
-  background-color: var(--color-grey-0);
+  background-color: var(--color-header-bg);
   padding: 1.2rem 4.8rem;
-  border-bottom: 1px solid var(--color-grey-100);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 2.4rem;
   align-items: center;

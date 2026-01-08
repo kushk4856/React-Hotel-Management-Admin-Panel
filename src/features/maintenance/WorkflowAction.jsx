@@ -10,12 +10,12 @@ const ActionBox = styled.div`
   gap: 1.6rem;
   border: 1px solid var(--color-grey-200);
 
-  ${props => props.variation === 'success' && `
+  ${props => props.$variation === 'success' && `
     border-color: var(--color-green-700);
     background-color: var(--color-green-100);
   `}
 
-  ${props => props.variation === 'warning' && `
+  ${props => props.$variation === 'warning' && `
     border-color: var(--color-yellow-700);
     background-color: var(--color-yellow-100);
   `}
@@ -32,7 +32,7 @@ const StepHeader = styled.div`
     font-size: 1.2rem;
     letter-spacing: 0.5px;
 
-    ${props => props.variation === 'warning' && `color: var(--color-yellow-700);`}
+    ${props => props.$variation === 'warning' && `color: var(--color-yellow-700);`}
 `;
 
 function WorkflowAction({
@@ -41,8 +41,8 @@ function WorkflowAction({
     variation = 'default'
 }) {
     return (
-        <ActionBox variation={variation}>
-            <StepHeader variation={variation}>{title}</StepHeader>
+        <ActionBox $variation={variation}>
+            <StepHeader $variation={variation}>{title}</StepHeader>
             {children}
         </ActionBox>
     );

@@ -4,26 +4,11 @@ import styled from "styled-components";
 import { useDeleteCabin } from "./useDeleteCabin";
 import { useUser } from "../authentication/useUser";
 import { formatCurrency } from "../../utils/helpers";
+import { ROLES } from "../../utils/constants";
 import CreateCabinForm from "./CreateCabinForm";
 import { HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2";
 import { useCreateCabin } from "./useCreateCabin";
-import Modal from "../../ui/Modal";
-import ConfirmDelete from "../../ui/ConfirmDelete";
-import Table from "../../ui/Table";
-import Menus from "../../ui/Menus";
-import Tag from "../../ui/Tag";
-
-// const TableRow = styled.div`
-//   display: grid;
-//   grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-//   column-gap: 2.4rem;
-//   align-items: center;
-//   padding: 1.4rem 2.4rem;
-
-//   &:not(:last-child) {
-//     border-bottom: 1px solid var(--color-grey-100);
-//   }
-// `;
+import { Modal, ConfirmDelete, Table, Menus, Tag } from "../../ui";
 
 const Img = styled.img`
   display: block;
@@ -50,6 +35,15 @@ const Discount = styled.div`
   font-family: "Sono";
   font-weight: 500;
   color: var(--color-green-700);
+`;
+
+const MaintenanceWrapper = styled.div`
+    margin-top: 0.4rem;
+`;
+
+const StyledTag = styled(Tag)`
+   font-size: 0.9rem;
+   width: fit-content;
 `;
 
 const CabinRow = ({ cabin }) => {
@@ -86,9 +80,9 @@ const CabinRow = ({ cabin }) => {
         <Cabin>
             {name}
             {is_out_of_service && (
-                <div style={{marginTop: '0.4rem'}}>
-                    <Tag type="red" style={{fontSize: '0.9rem', width: 'fit-content'}}>Maintenance</Tag> 
-                </div>
+                <MaintenanceWrapper>
+                    <StyledTag type="red">Maintenance</StyledTag> 
+                </MaintenanceWrapper>
             )}
         </Cabin>
         <div>Fits up to {maxCapacity}</div>
@@ -112,14 +106,14 @@ const CabinRow = ({ cabin }) => {
                 </Menus.Button>
 
                 {/* EDIT: Admin + Manager */}
-                {["admin", "manager"].includes(role) && (
+                {[ROLES.ADMIN, ROLES.MANAGER].includes(role) && (
                   <Modal.Open opens={"edit"}>
                     <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
                   </Modal.Open>
                 )}
 
                 {/* DELETE: Admin Only */}
-                {role === "admin" && (
+                {role === ROLES.ADMIN && (
                   <Modal.Open opens={"delete"}>
                     <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
                   </Modal.Open>

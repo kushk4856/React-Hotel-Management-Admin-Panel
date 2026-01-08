@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { 
   HiOutlineBriefcase, 
   HiOutlineCheckCircle, 
-  HiOutlineClock,
   HiOutlineExclamationCircle,
   HiOutlineWrenchScrewdriver
 } from "react-icons/hi2";
@@ -22,7 +21,6 @@ import CreateTaskForm from "../features/housekeeping/CreateTaskForm";
 import { HiPlus } from "react-icons/hi2";
 
 const DashboardContainer = styled.div`
-  background-color: var(--color-grey-50); 
   min-height: 100vh;
   padding: 2.4rem;
 `;
@@ -59,39 +57,7 @@ const HeaderLeft = styled.div`
   }
 `;
 
-const LiveBadge = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  background-color: rgba(255, 255, 255, 0.2);
-  padding: 0.8rem 1.6rem;
-  border-radius: 100px;
-  backdrop-filter: blur(10px);
-  
-  span {
-    color: white;
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-`;
 
-const LiveDot = styled.div`
-  width: 8px;
-  height: 8px;
-  background-color: #4ade80;
-  border-radius: 50%;
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  box-shadow: 0 0 8px #4ade80;
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-`;
 
 const StatsGrid = styled.div`
   display: grid;
@@ -213,7 +179,6 @@ function HousekeepingDashboard() {
   const done = myTasks.filter(t => t.status === "done" || t.status === "verified").length;
   // const remaining = totalAssigned - done; // Removed as per request
   const priorityRooms = myTasks.filter(t => t.priority === "high" || t.task_type === "checkout_clean").length;
-  const needsInspection = myTasks.filter(t => t.status === "done").length;
   const myOpenIssues = tickets?.filter(t => 
     myTasks.some(task => task.cabin_id === t.cabin_id) && 
     t.status !== "resolved"
@@ -253,11 +218,6 @@ function HousekeepingDashboard() {
         </HeaderLeft>
         
         <HeaderActions>
-            <LiveBadge>
-              <LiveDot />
-              <span>Real-time</span>
-            </LiveBadge>
-
             <Modal>
                 <Modal.Open opens="create-task">
                     <Button size="medium" variation="primary">

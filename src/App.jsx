@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import GlobalStyles from "./styles/GlobalStyles";
 import AppLayout from "./ui/AppLayout";
@@ -10,6 +10,7 @@ import RestrictedTo from "./ui/RestrictedTo";
 import { DarkModeProvider } from "./context/DarkModeContext";
 import Spinner from "./ui/Spinner";
 import RoleBasedRedirect from "./ui/RoleBasedRedirect";
+import { ROLES, PERMISSIONS } from "./utils/constants";
 
 // Lazy Loading Pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -18,8 +19,10 @@ const Cabins = lazy(() => import("./pages/Cabins"));
 const Users = lazy(() => import("./pages/Users"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Account = lazy(() => import("./pages/Account"));
+const Reports = lazy(() => import("./pages/Reports"));
+const RolesPermissions = lazy(() => import("./pages/RolesPermissions"));
+const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const MyRooms = lazy(() => import("./pages/MyRooms"));
-const HousekeepingDashboard = lazy(() => import("./pages/HousekeepingDashboard"));
 const HousekeepingModule = lazy(() => import("./pages/HousekeepingModule"));
 const RoomDetails = lazy(() => import("./pages/RoomDetails"));
 const Maintenance = lazy(() => import("./pages/Maintenance"));
@@ -59,7 +62,7 @@ const App = () => {
                 <Route 
                   path="dashboard" 
                   element={
-                    <RestrictedTo allowedRole={["admin", "manager"]}>
+                    <RestrictedTo allowedRole={[ROLES.ADMIN, ROLES.MANAGER]}>
                       <Dashboard />
                     </RestrictedTo>
                   } 
@@ -67,7 +70,7 @@ const App = () => {
                 <Route 
                   path="bookings" 
                   element={
-                    <RestrictedTo allowedRole={["admin", "manager", "receptionist"]}>
+                    <RestrictedTo allowedRole={[ROLES.ADMIN, ROLES.MANAGER, ROLES.RECEPTIONIST]}>
                       <Booking />
                     </RestrictedTo>
                   } 
@@ -75,7 +78,7 @@ const App = () => {
                 <Route
                   path="bookings/:bookingId"
                   element={
-                    <RestrictedTo allowedRole={["admin", "manager", "receptionist"]}>
+                    <RestrictedTo allowedRole={[ROLES.ADMIN, ROLES.MANAGER, ROLES.RECEPTIONIST]}>
                       <BookingDetailPage />
                     </RestrictedTo>
                   }
@@ -83,7 +86,7 @@ const App = () => {
                 <Route 
                    path="checkin/:bookingId" 
                    element={
-                    <RestrictedTo allowedRole={["admin", "manager", "receptionist"]}>
+                    <RestrictedTo allowedRole={[ROLES.ADMIN, ROLES.MANAGER, ROLES.RECEPTIONIST]}>
                        <Checkin />
                     </RestrictedTo>
                    } 
@@ -92,15 +95,33 @@ const App = () => {
                 <Route
                   path="users"
                   element={
-                    <RestrictedTo allowedRole="admin">
+                    <RestrictedTo allowedRole={ROLES.ADMIN}>
                       <Users />
                     </RestrictedTo>
                   }
                 />
+                 {/* Admin Only Routes */}
+                <Route 
+                  path="roles" 
+                  element={
+                    <RestrictedTo allowedRole={ROLES.ADMIN}>
+                      <RolesPermissions />
+                    </RestrictedTo>
+                  } 
+                />
+                <Route 
+                  path="audit-logs" 
+                  element={
+                    <RestrictedTo requiredPermission={PERMISSIONS.AUDIT_READ}>
+                      <AuditLogs />
+                    </RestrictedTo>
+                  } 
+                />
+
                 <Route 
                   path="cabins" 
                   element={
-                    <RestrictedTo allowedRole={["admin", "manager"]}>
+                    <RestrictedTo allowedRole={[ROLES.ADMIN, ROLES.MANAGER]}>
                       <Cabins />
                     </RestrictedTo>
                   } 
@@ -108,10 +129,18 @@ const App = () => {
                 <Route 
                   path="settings" 
                   element={
-                    <RestrictedTo allowedRole="admin">
+                    <RestrictedTo allowedRole={ROLES.ADMIN}>
                       <Settings />
                     </RestrictedTo>
                   } 
+                />
+                <Route 
+                   path="reports" 
+                   element={
+                    <RestrictedTo allowedRole={[ROLES.ADMIN, ROLES.MANAGER]}>
+                      <Reports />
+                    </RestrictedTo>
+                   } 
                 />
                 
                 {/* Housekeeping Routes - Accessible to all (or specific roles) */}

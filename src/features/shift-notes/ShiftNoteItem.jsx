@@ -17,11 +17,11 @@ const NoteCard = styled.div`
   margin-bottom: 2rem;
   position: relative;
   
-  ${props => props.status === 'posted' && `
+  ${props => props.$status === 'posted' && `
     border-left: 5px solid var(--color-brand-500);
   `}
 
-  ${props => props.status === 'acknowledged' && `
+  ${props => props.$status === 'acknowledged' && `
     border-left: 5px solid var(--color-green-500);
     opacity: 0.9;
   `}
@@ -84,9 +84,8 @@ function ShiftNoteItem({ note }) {
     function handleAck() {
         acknowledge({ id: note.id, userId: user.id });
     }
-
     return (
-        <NoteCard status={note.status}>
+        <NoteCard $status={note.status}>
             <NoteHeader>
                 <div>
                    <Heading as="h3">
